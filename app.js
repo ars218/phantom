@@ -111,7 +111,7 @@
     end: "top center",
     pin: productStage,
     pinSpacing: false,
-    scrub: true,
+    scrub: 0.65,
     onUpdate: (self) => {
       const p = self.progress;
       gsap.set(productWrap, {
