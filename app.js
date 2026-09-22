@@ -1,1 +1,422 @@
-PLACEHOLDER
+/* =========================================================
+   Phantom by ART — cinematic motion (GSAP + ScrollTrigger)
+   ========================================================= */
+(() => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const body = document.body;
+  const productWrap = document.getElementById("product-wrap");
+  const productStage = document.getElementById("product-stage");
+  const productGlow = document.querySelector(".product-glow");
+  const lid = document.querySelector(".case-lid");
+  const budLeft = document.querySelector(".bud-left");
+  const budRight = document.querySelector(".bud-right");
+  const soundRing = document.querySelector(".sound-ring");
+  const navItems = document.querySelectorAll(".nav-item");
+  const colorCards = document.querySelectorAll(".color-card");
+  const form = document.getElementById("notify-form");
+  const toast = document.getElementById("toast");
+  const featureCards = document.querySelectorAll(".feature-card");
+  const flecksContainer = document.getElementById("flecks-container");
+  const orbs = document.querySelector(".orbs");
+
+  const THEMES = {
+    midnight: {
+      inner: "#2a4a8a",
+      mid: "#0e1a34",
+      outer: "#050a14",
+    },
+    aura: {
+      inner: "#0b8a7a",
+      mid: "#044e46",
+      outer: "#011412",
+    },
+  };
+
+  let isSwitching = false;
+  let mouse = { x: 0, y: 0 };
+  let currentMouse = { x: 0, y: 0 };
+
+  /* ---------- Atmosphere flecks ---------- */
+  function spawnFleck() {
+    if (!flecksContainer || reduceMotion) return;
+    const fleck = document.createElement("span");
+    fleck.className = "fleck";
+    const size = Math.random() * 3.5 + 1.2;
+    fleck.style.width = `${size}px`;
+    fleck.style.height = `${size}px`;
+    fleck.style.left = `${Math.random() * 100}%`;
+    fleck.style.bottom = "-20px";
+    fleck.style.opacity = String(Math.random() * 0.45 + 0.15);
+    const duration = Math.random() * 7 + 5;
+    fleck.style.animation = `fleckRise ${duration}s linear forwards`;
+    flecksContainer.appendChild(fleck);
+    setTimeout(() => fleck.remove(), duration * 1000);
+  }
+
+  if (!reduceMotion) {
+    setInterval(spawnFleck, 380);
+    for (let i = 0; i < 8; i++) setTimeout(spawnFleck, i * 120);
+  }
+
+  /* ---------- Theme switch (page-wide CSS vars) ---------- */
+  function setTheme(theme) {
+    if (isSwitching || !THEMES[theme]) return;
+    if (body.getAttribute("data-theme") === theme) return;
+    isSwitching = true;
+
+    colorCards.forEach((card) => {
+      const on = card.dataset.theme === theme;
+      card.classList.toggle("active", on);
+      card.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    const colors = THEMES[theme];
+
+    if (typeof gsap !== "undefined" && !reduceMotion) {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          body.setAttribute("data-theme", theme);
+          isSwitching = false;
+        },
+      });
+
+      tl.to(body, {
+        "--bg-inner": colors.inner,
+        "--bg-mid": colors.mid,
+        "--bg-outer": colors.outer,
+        duration: 1.2,
+        ease: "power2.inOut",
+      }, 0);
+
+      if (productWrap) {
+        tl.to(productWrap, {
+          filter: "blur(10px) brightness(1.15)",
+          scale: 0.92,
+          rotateY: theme === "aura" ? 18 : -18,
+          duration: 0.45,
+          ease: "power2.in",
+        }, 0);
+        tl.add(() => body.setAttribute("data-theme", theme));
+        tl.to(productWrap, {
+          filter: "blur(0px) brightness(1)",
+          scale: 1,
+          rotateY: 0,
+          duration: 0.85,
+          ease: "back.out(1.4)",
+        });
+      }
+
+      if (productGlow) {
+        tl.fromTo(
+          productGlow,
+          { scale: 0.7, opacity: 0.4 },
+          { scale: 1.15, opacity: 1, duration: 1, ease: "power2.out" },
+          0.2
+        );
+      }
+    } else {
+      body.setAttribute("data-theme", theme);
+      isSwitching = false;
+    }
+  }
+
+  colorCards.forEach((card) => {
+    card.style.touchAction = "manipulation";
+    const activate = (e) => {
+      e.preventDefault();
+      setTheme(card.dataset.theme);
+    };
+    card.addEventListener("click", activate);
+    card.addEventListener("pointerup", (e) => {
+      if (e.pointerType === "touch" || e.pointerType === "pen") activate(e);
+    });
+  });
+
+  /* ---------- Notify form ---------- */
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = form.querySelector("input");
+      if (input && !input.checkValidity()) {
+        input.reportValidity();
+        return;
+      }
+      if (toast) {
+        toast.hidden = false;
+        toast.textContent = "You're on the list.";
+      }
+      if (input) {
+        input.value = "";
+        input.disabled = true;
+      }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        const label = submitBtn.querySelector("span:first-child");
+        if (label) label.textContent = "You're in";
+        else submitBtn.textContent = "You're in";
+      }
+      if (typeof gsap !== "undefined" && toast && !reduceMotion) {
+        gsap.fromTo(toast, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" });
+      }
+    });
+  }
+
+  /* ---------- Active nav ---------- */
+  const sections = ["hero", "colorways", "sound", "fit", "features", "cta"]
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  function updateNav() {
+    const y = window.scrollY + window.innerHeight * 0.32;
+    let current = sections[0]?.id;
+    for (const sec of sections) {
+      if (sec.offsetTop <= y) current = sec.id;
+    }
+    navItems.forEach((a) => {
+      a.classList.toggle("active", a.getAttribute("href") === `#${current}`);
+    });
+  }
+  window.addEventListener("scroll", updateNav, { passive: true });
+  updateNav();
+
+  /* ---------- Parallax orbs / mouse ---------- */
+  window.addEventListener(
+    "mousemove",
+    (e) => {
+      mouse.x = e.clientX / window.innerWidth - 0.5;
+      mouse.y = e.clientY / window.innerHeight - 0.5;
+    },
+    { passive: true }
+  );
+
+  function parallaxLoop() {
+    if (reduceMotion) return;
+    currentMouse.x += (mouse.x - currentMouse.x) * 0.06;
+    currentMouse.y += (mouse.y - currentMouse.y) * 0.06;
+
+    if (orbs) {
+      orbs.style.transform = `translate(${currentMouse.x * -28}px, ${currentMouse.y * -20}px)`;
+    }
+
+    requestAnimationFrame(parallaxLoop);
+  }
+  parallaxLoop();
+
+  /* ---------- GSAP / ScrollTrigger ---------- */
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
+    console.warn("GSAP / ScrollTrigger missing — static page");
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* Intro */
+  gsap.from(".hero-copy > *", {
+    y: 36,
+    opacity: 0,
+    duration: reduceMotion ? 0.01 : 1,
+    stagger: 0.1,
+    ease: "power3.out",
+    delay: 0.2,
+  });
+
+  if (productWrap && !reduceMotion) {
+    gsap.from(productWrap, {
+      scale: 0.82,
+      opacity: 0,
+      rotateY: -24,
+      duration: 1.4,
+      ease: "power3.out",
+      delay: 0.35,
+    });
+  }
+
+  if (reduceMotion) {
+    gsap.set(featureCards, { opacity: 1, y: 0 });
+    return;
+  }
+
+  const isMobile = () => window.innerWidth <= 900;
+
+  /* Pin product through mid-scroll with meaningful transforms */
+  if (productStage && productWrap) {
+    ScrollTrigger.create({
+      trigger: "#hero",
+      start: "top top",
+      endTrigger: "#features",
+      end: "top 55%",
+      pin: isMobile() ? false : productStage,
+      pinSpacing: false,
+      scrub: 0.7,
+      onUpdate: (self) => {
+        const p = self.progress;
+        const mobile = isMobile();
+
+        gsap.set(productWrap, {
+          scale: 1 - p * (mobile ? 0.08 : 0.14),
+          rotate: p * (mobile ? 4 : 10),
+          y: p * (mobile ? 20 : 48),
+          rotateX: p * -6,
+        });
+
+        /* Sound ring peaks mid-way */
+        if (soundRing) {
+          const ringOpacity = p > 0.28 && p < 0.62
+            ? Math.sin(((p - 0.28) / 0.34) * Math.PI)
+            : 0;
+          gsap.set(soundRing, { opacity: ringOpacity * 0.95 });
+        }
+
+        /* Fade product as features arrive */
+        if (p > 0.82) {
+          gsap.set(productStage, { opacity: 1 - (p - 0.82) / 0.18 });
+        } else if (!mobile) {
+          gsap.set(productStage, { opacity: 1 });
+        } else {
+          gsap.set(productStage, {
+            opacity: p > 0.7 ? 1 - (p - 0.7) / 0.3 : 0.95,
+          });
+        }
+      },
+    });
+  }
+
+  /* Fit & case: buds settle + lid opens + shine */
+  if (lid && budLeft && budRight) {
+    const fitTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#fit",
+        start: "top 80%",
+        end: "center center",
+        scrub: 0.8,
+      },
+    });
+
+    fitTl
+      .to(budLeft, { y: 72, x: 10, scale: 0.68, rotate: -8, ease: "none" }, 0)
+      .to(budRight, { y: 72, x: -10, scale: 0.68, rotate: 8, ease: "none" }, 0)
+      .to(
+        lid,
+        {
+          rotateX: -62,
+          y: -22,
+          transformOrigin: "50% 100%",
+          ease: "none",
+        },
+        0
+      );
+
+    const shine = document.querySelector(".shine-bar");
+    if (shine) {
+      gsap.fromTo(
+        shine,
+        { x: -80, opacity: 0 },
+        {
+          x: 280,
+          opacity: 0.7,
+          duration: 1.4,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: "#fit",
+            start: "top 60%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }
+  }
+
+  /* Features stagger + glow */
+  gsap.from(featureCards, {
+    y: 56,
+    opacity: 0,
+    scale: 0.94,
+    duration: 0.9,
+    stagger: 0.14,
+    ease: "power3.out",
+    scrollTrigger: {
+      trigger: "#features",
+      start: "top 72%",
+      toggleActions: "play none none reverse",
+    },
+  });
+
+  /* Color cards entrance */
+  gsap.from(".color-card", {
+    y: 48,
+    opacity: 0,
+    scale: 0.92,
+    duration: 0.85,
+    stagger: 0.12,
+    ease: "back.out(1.3)",
+    scrollTrigger: {
+      trigger: "#colorways",
+      start: "top 75%",
+      toggleActions: "play none none reverse",
+    },
+  });
+
+  /* Section copy fades */
+  document.querySelectorAll(".section-head, .sound-copy, .cta-panel").forEach((el) => {
+    gsap.from(el, {
+      y: 36,
+      opacity: 0,
+      duration: 0.9,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: el,
+        start: "top 82%",
+        toggleActions: "play none none reverse",
+      },
+    });
+  });
+
+  /* EQ bars amplify in sound section */
+  gsap.fromTo(
+    ".eq span",
+    { scaleY: 0.2, opacity: 0.3 },
+    {
+      scaleY: 1,
+      opacity: 1,
+      duration: 0.6,
+      stagger: { each: 0.04, from: "center" },
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: "#sound",
+        start: "top 65%",
+        toggleActions: "play none none reverse",
+      },
+    }
+  );
+
+  /* Hide scroll cue */
+  gsap.to(".scroll-cue", {
+    opacity: 0,
+    scrollTrigger: {
+      trigger: "#hero",
+      start: "70% top",
+      end: "bottom top",
+      scrub: true,
+    },
+  });
+
+  /* Card hover spring (desktop) */
+  if (!isMobile()) {
+    featureCards.forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        gsap.to(card, { y: -10, duration: 0.4, ease: "power2.out" });
+      });
+      card.addEventListener("mouseleave", () => {
+        gsap.to(card, { y: 0, duration: 0.5, ease: "power2.out" });
+      });
+    });
+  }
+
+  /* Refresh on resize for pin / mobile switch */
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 200);
+  });
+})();
