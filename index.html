@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Phantom by ART | Premium Wireless Earbuds</title>
+<meta name="description" content="Phantom by ART — premium wireless earbuds. Clean sound, all-day comfort, liquid-glass case.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body data-theme="midnight">
+  <div class="ambient" aria-hidden="true"></div>
+
+  <header class="header">
+    <a href="#hero" class="logo" aria-label="ART home">
+      <span class="logo-mark">ART</span>
+      <span class="logo-divider"></span>
+      <span class="logo-product">Phantom</span>
+    </a>
+    <nav class="nav glass" aria-label="Primary">
+      <a class="nav-item active" href="#hero">Home</a>
+      <a class="nav-item" href="#colorways">Color</a>
+      <a class="nav-item" href="#sound">Sound</a>
+      <a class="nav-item" href="#fit">Fit</a>
+      <a class="nav-item" href="#features">Features</a>
+    </nav>
+    <a class="header-cta" href="#cta">Notify me</a>
+  </header>
+
+  <!-- Sticky product stage -->
+  <div class="product-stage" id="product-stage" aria-hidden="true">
+    <div class="product-wrap" id="product-wrap">
+      <svg class="product-svg" viewBox="0 0 320 360" role="img" aria-label="Phantom earbuds and case">
+        <defs>
+          <linearGradient id="caseGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+            <stop offset="40%" stop-color="rgba(255,255,255,0.12)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.04)"/>
+          </linearGradient>
+          <linearGradient id="budBody" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="bud-stop-a" stop-color="var(--bud-hi)"/>
+            <stop offset="100%" class="bud-stop-b" stop-color="var(--bud-lo)"/>
+          </linearGradient>
+          <linearGradient id="lidGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+          </linearGradient>
+          <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.55"/>
+            <stop offset="70%" stop-color="var(--accent)" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Ambient ring (sound section glow) -->
+        <ellipse class="sound-ring" cx="160" cy="200" rx="118" ry="118" fill="url(#ringGlow)" opacity="0"/>
+
+        <!-- Case base -->
+        <g class="case-base" transform="translate(70, 140)">
+          <rect x="0" y="40" width="180" height="130" rx="36" fill="url(#caseGlass)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+          <rect x="8" y="48" width="164" height="114" rx="30" fill="rgba(0,0,0,0.25)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <!-- hinge -->
+          <rect x="70" y="36" width="40" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+          <!-- LED -->
+          <circle class="case-led" cx="90" cy="155" r="4" fill="var(--accent)" filter="url(#softGlow)"/>
+        </g>
+
+        <!-- Lid (opens with scroll) -->
+        <g class="case-lid" style="transform-origin: 160px 180px">
+          <path d="M78 180 Q78 140 100 128 L220 128 Q242 140 242 180 Z"
+                fill="url(#lidGlass)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <ellipse cx="160" cy="154" rx="52" ry="10" fill="rgba(255,255,255,0.12)"/>
+        </g>
+
+        <!-- Left bud -->
+        <g class="bud bud-left" transform="translate(95, 95)">
+          <ellipse cx="28" cy="52" rx="22" ry="38" fill="url(#budBody)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+          <ellipse cx="28" cy="28" rx="18" ry="16" fill="rgba(255,255,255,0.15)"/>
+          <circle cx="28" cy="26" r="7" fill="rgba(20,20,30,0.85)"/>
+          <ellipse cx="22" cy="44" rx="5" ry="10" fill="rgba(255,255,255,0.18)"/>
+        </g>
+
+        <!-- Right bud -->
+        <g class="bud bud-right" transform="translate(170, 95)">
+          <ellipse cx="28" cy="52" rx="22" ry="38" fill="url(#budBody)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+          <ellipse cx="28" cy="28" rx="18" ry="16" fill="rgba(255,255,255,0.15)"/>
+          <circle cx="28" cy="26" r="7" fill="rgba(20,20,30,0.85)"/>
+          <ellipse cx="34" cy="44" rx="5" ry="10" fill="rgba(255,255,255,0.18)"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <main>
+    <!-- 1. Hero -->
+    <section class="section hero" id="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Phantom by ART</p>
+        <h1 class="hero-title">Sound that<br>disappears into<br>the day.</h1>
+        <p class="hero-sub">Premium wireless earbuds — clean sound, all-day comfort, liquid-glass case.</p>
+        <a class="btn btn-primary" href="#cta">Coming soon</a>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- 2. Colorways -->
+    <section class="section colorways" id="colorways">
+      <div class="section-copy">
+        <p class="eyebrow">Colorways</p>
+        <h2 class="section-title">Two moods.<br>One Phantom.</h2>
+        <p class="section-body">Switch early — the whole page rethemes with you.</p>
+        <div class="color-switch" role="group" aria-label="Choose colorway">
+          <button type="button" class="color-btn active" data-theme="midnight" aria-pressed="true">
+            <span class="swatch midnight"></span>
+            Midnight
+          </button>
+          <button type="button" class="color-btn" data-theme="aura" aria-pressed="false">
+            <span class="swatch aura"></span>
+            Aura
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Sound -->
+    <section class="section sound" id="sound">
+      <div class="section-copy">
+        <p class="eyebrow">Sound</p>
+        <h2 class="section-title">Tuned to vanish<br>into the mix.</h2>
+        <p class="section-body">Balanced drivers and adaptive ANC keep the music clear and the world quiet — without weight.</p>
+      </div>
+      <div class="eq" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span>
+      </div>
+    </section>
+
+    <!-- 4. Fit & case -->
+    <section class="section fit" id="fit">
+      <div class="section-copy">
+        <p class="eyebrow">Fit &amp; case</p>
+        <h2 class="section-title">Settle in.<br>Snap shut.</h2>
+        <p class="section-body">Ergonomic tips for all-day wear. A liquid-glass case that feels as refined as it looks.</p>
+      </div>
+    </section>
+
+    <!-- 5. Features -->
+    <section class="section features" id="features">
+      <div class="section-copy center">
+        <p class="eyebrow">Features</p>
+        <h2 class="section-title">Built for the long haul.</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="glass-card feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M14 24c2-6 6-10 10-10s8 4 10 10c-2 6-6 10-10 10s-8-4-10-10z" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+          </div>
+          <h3>Active noise cancel</h3>
+          <p>Adaptive ANC tunes out the commute so you stay in the track.</p>
+        </article>
+        <article class="glass-card feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none"><rect x="12" y="16" width="24" height="16" rx="4" stroke="currentColor" stroke-width="1.5"/><rect x="36" y="20" width="3" height="8" rx="1" fill="currentColor"/><rect x="15" y="19" width="14" height="10" rx="2" fill="currentColor" opacity="0.35"/></svg>
+          </div>
+          <h3>All-day battery</h3>
+          <p>Long listening sessions with the case — ready when you are.</p>
+        </article>
+        <article class="glass-card feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none"><path d="M24 8c8 8 12 14 12 22a12 12 0 11-24 0c0-8 4-14 12-22z" stroke="currentColor" stroke-width="1.5"/><path d="M24 28v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Water resistant</h3>
+          <p>Sweat and splash ready for workouts, trains, and rainy walks.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 6. CTA -->
+    <section class="section cta" id="cta">
+      <div class="cta-panel glass-card">
+        <p class="eyebrow">Coming soon</p>
+        <h2 class="section-title">Be first to hear Phantom.</h2>
+        <p class="section-body">Join the list. No spam — just a note when ART ships.</p>
+        <form class="notify-form" id="notify-form" novalidate>
+          <label class="sr-only" for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email">
+          <button type="submit" class="btn btn-primary">Notify me</button>
+        </form>
+        <p class="toast" id="toast" role="status" aria-live="polite" hidden>You're on the list.</p>
+      </div>
+      <footer class="site-footer">
+        <span>© ART · Phantom</span>
+        <span class="footer-dot">·</span>
+        <span>Coming soon</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
