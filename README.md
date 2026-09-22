@@ -6,6 +6,15 @@ Scroll landing for **Phantom** wireless earbuds — Midnight & Aura colorways, l
 
 https://ars218.github.io/phantom/
 
+## Enable GitHub Pages (required once)
+
+If the live URL 404s, enable Pages:
+
+1. Open https://github.com/ars218/phantom/settings/pages
+2. **Build and deployment** → Source: **Deploy from a branch**
+3. Branch: **main** → folder: **/ (root)** → **Save**
+4. Wait 1–2 minutes, then hard-refresh the live URL (CDN cache can lag)
+
 ## Stack
 
 - `index.html` + `styles.css` + `app.js` (split for GitHub Pages)
@@ -19,14 +28,6 @@ Hero → Colorways → Sound → Fit & case → Features → CTA
 
 ## Local
 
-Open `index.html` in a browser, or serve the folder:
-
 ```bash
 npx serve .
 ```
-
-## GitHub Pages
-
-Settings → Pages → Source: **Deploy from a branch** → Branch **main** / folder **/ (root)**.
-
-If the live URL 404s after the first push, enable Pages as above and wait 1–2 minutes for CDN cache.
