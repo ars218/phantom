@@ -190,7 +190,9 @@ position:relative;width:100%;height:48vh;min-height:280px;max-height:420px;top:a
 .product-stage{
 position:fixed;top:auto;bottom:0;right:0;left:0;width:100%;height:42vh;opacity:0.95;z-index:15;align-items:flex-end;padding-bottom:1rem}
 .product-wrap{
-width:min(70vw,280px);animation:productFloatMobile 6s ease-in-out infinite}
+width:min(58vw,300px);height:min(58vw,300px);animation:productFloatMobile 6s ease-in-out infinite}
+.product-3d,#product-model{
+max-width:min(58vw,300px);max-height:min(58vw,300px)}
 @keyframes productFloatMobile{
 0%,100%{
 transform:translateY(0)}
@@ -258,7 +260,9 @@ font-size:clamp(2.3rem,13vw,3.2rem)}
 .product-stage{
 height:38vh}
 .product-wrap{
-width:min(62vw,240px)}
+width:min(52vw,240px);height:min(52vw,240px)}
+.product-3d,#product-model{
+max-width:min(52vw,240px);max-height:min(52vw,240px)}
 .color-card{
 max-width:100%;flex:1 1 100%}
 }
