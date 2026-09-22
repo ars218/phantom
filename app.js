@@ -1,5 +1,6 @@
 /* =========================================================
    Phantom by ART — cinematic motion (GSAP + ScrollTrigger)
+   3D hero via @google/model-viewer
    ========================================================= */
 (() => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -7,10 +8,7 @@
   const productWrap = document.getElementById("product-wrap");
   const productStage = document.getElementById("product-stage");
   const productGlow = document.querySelector(".product-glow");
-  const lid = document.querySelector(".case-lid");
-  const budLeft = document.querySelector(".bud-left");
-  const budRight = document.querySelector(".bud-right");
-  const soundRing = document.querySelector(".sound-ring");
+  const modelViewer = document.getElementById("product-model");
   const navItems = document.querySelectorAll(".nav-item");
   const colorCards = document.querySelectorAll(".color-card");
   const form = document.getElementById("notify-form");
@@ -24,19 +22,99 @@
       inner: "#2a4a8a",
       mid: "#0e1a34",
       outer: "#050a14",
+      accent: [0.49, 0.71, 1.0, 1.0],
+      emissive: [0.08, 0.14, 0.28, 1.0],
+      filter:
+        "drop-shadow(0 28px 48px rgba(0,0,0,0.5)) brightness(1.02) saturate(1.05) hue-rotate(0deg)",
     },
     aura: {
       inner: "#0b8a7a",
       mid: "#044e46",
       outer: "#011412",
+      accent: [0.24, 0.88, 0.82, 1.0],
+      emissive: [0.04, 0.22, 0.2, 1.0],
+      filter:
+        "drop-shadow(0 28px 48px rgba(0,0,0,0.5)) brightness(1.08) saturate(1.25) hue-rotate(145deg)",
     },
   };
 
   let isSwitching = false;
   let mouse = { x: 0, y: 0 };
   let currentMouse = { x: 0, y: 0 };
+  let materialsTinted = false;
 
-  /* ---------- Atmosphere flecks ---------- */
+  function disableAutoRotateIfNeeded() {
+    if (!modelViewer) return;
+    if (reduceMotion) {
+      modelViewer.removeAttribute("auto-rotate");
+      modelViewer.autoRotate = false;
+    }
+  }
+  disableAutoRotateIfNeeded();
+
+  function tintModelMaterials(theme) {
+    if (!modelViewer) return false;
+    const colors = THEMES[theme];
+    if (!colors) return false;
+
+    try {
+      const model = modelViewer.model;
+      if (!model || !model.materials || !model.materials.length) return false;
+
+      model.materials.forEach((mat, i) => {
+        const pbr = mat.pbrMetallicRoughness;
+        if (!pbr) return;
+
+        const factor =
+          i % 2 === 0
+            ? colors.accent
+            : theme === "aura"
+              ? [0.12, 0.35, 0.34, 1]
+              : [0.18, 0.24, 0.38, 1];
+
+        if (typeof pbr.setBaseColorFactor === "function") {
+          pbr.setBaseColorFactor(factor);
+        } else if (pbr.baseColorFactor) {
+          pbr.baseColorFactor = factor;
+        }
+
+        if (mat.setEmissiveFactor) {
+          mat.setEmissiveFactor(colors.emissive.slice(0, 3));
+        } else if (mat.emissiveFactor) {
+          mat.emissiveFactor = colors.emissive.slice(0, 3);
+        }
+      });
+
+      materialsTinted = true;
+      modelViewer.style.filter = "drop-shadow(0 28px 48px rgba(0,0,0,0.5))";
+      return true;
+    } catch (err) {
+      console.warn("Material tint failed, using CSS filter", err);
+      return false;
+    }
+  }
+
+  function applyThemeToModel(theme) {
+    if (!modelViewer) return;
+    const colors = THEMES[theme];
+    if (!colors) return;
+
+    const ok = tintModelMaterials(theme);
+    if (!ok) {
+      modelViewer.style.filter = colors.filter;
+    }
+  }
+
+  if (modelViewer) {
+    modelViewer.addEventListener("load", () => {
+      disableAutoRotateIfNeeded();
+      applyThemeToModel(body.getAttribute("data-theme") || "midnight");
+    });
+    if (modelViewer.loaded) {
+      applyThemeToModel(body.getAttribute("data-theme") || "midnight");
+    }
+  }
+
   function spawnFleck() {
     if (!flecksContainer || reduceMotion) return;
     const fleck = document.createElement("span");
@@ -58,7 +136,6 @@
     for (let i = 0; i < 8; i++) setTimeout(spawnFleck, i * 120);
   }
 
-  /* ---------- Theme switch (page-wide CSS vars) ---------- */
   function setTheme(theme) {
     if (isSwitching || !THEMES[theme]) return;
     if (body.getAttribute("data-theme") === theme) return;
@@ -76,27 +153,39 @@
       const tl = gsap.timeline({
         onComplete: () => {
           body.setAttribute("data-theme", theme);
+          applyThemeToModel(theme);
           isSwitching = false;
         },
       });
 
-      tl.to(body, {
-        "--bg-inner": colors.inner,
-        "--bg-mid": colors.mid,
-        "--bg-outer": colors.outer,
-        duration: 1.2,
-        ease: "power2.inOut",
-      }, 0);
+      tl.to(
+        body,
+        {
+          "--bg-inner": colors.inner,
+          "--bg-mid": colors.mid,
+          "--bg-outer": colors.outer,
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        0
+      );
 
       if (productWrap) {
-        tl.to(productWrap, {
-          filter: "blur(10px) brightness(1.15)",
-          scale: 0.92,
-          rotateY: theme === "aura" ? 18 : -18,
-          duration: 0.45,
-          ease: "power2.in",
-        }, 0);
-        tl.add(() => body.setAttribute("data-theme", theme));
+        tl.to(
+          productWrap,
+          {
+            filter: "blur(10px) brightness(1.15)",
+            scale: 0.92,
+            rotateY: theme === "aura" ? 18 : -18,
+            duration: 0.45,
+            ease: "power2.in",
+          },
+          0
+        );
+        tl.add(() => {
+          body.setAttribute("data-theme", theme);
+          applyThemeToModel(theme);
+        });
         tl.to(productWrap, {
           filter: "blur(0px) brightness(1)",
           scale: 1,
@@ -116,6 +205,7 @@
       }
     } else {
       body.setAttribute("data-theme", theme);
+      applyThemeToModel(theme);
       isSwitching = false;
     }
   }
@@ -132,7 +222,6 @@
     });
   });
 
-  /* ---------- Notify form ---------- */
   if (form) {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -157,12 +246,15 @@
         else submitBtn.textContent = "You're in";
       }
       if (typeof gsap !== "undefined" && toast && !reduceMotion) {
-        gsap.fromTo(toast, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" });
+        gsap.fromTo(
+          toast,
+          { y: 10, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }
+        );
       }
     });
   }
 
-  /* ---------- Active nav ---------- */
   const sections = ["hero", "colorways", "sound", "fit", "features", "cta"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
@@ -180,7 +272,6 @@
   window.addEventListener("scroll", updateNav, { passive: true });
   updateNav();
 
-  /* ---------- Parallax orbs / mouse ---------- */
   window.addEventListener(
     "mousemove",
     (e) => {
@@ -203,7 +294,6 @@
   }
   parallaxLoop();
 
-  /* ---------- GSAP / ScrollTrigger ---------- */
   if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
     console.warn("GSAP / ScrollTrigger missing — static page");
     return;
@@ -211,7 +301,6 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  /* Intro */
   gsap.from(".hero-copy > *", {
     y: 36,
     opacity: 0,
@@ -239,7 +328,6 @@
 
   const isMobile = () => window.innerWidth <= 900;
 
-  /* Pin product through mid-scroll with meaningful transforms */
   if (productStage && productWrap) {
     ScrollTrigger.create({
       trigger: "#hero",
@@ -260,15 +348,13 @@
           rotateX: p * -6,
         });
 
-        /* Sound ring peaks mid-way */
-        if (soundRing) {
-          const ringOpacity = p > 0.28 && p < 0.62
-            ? Math.sin(((p - 0.28) / 0.34) * Math.PI)
-            : 0;
-          gsap.set(soundRing, { opacity: ringOpacity * 0.95 });
+        if (modelViewer) {
+          const az = 25 + p * 55;
+          const pol = 75 - p * 18;
+          const rad = 105 + p * 12;
+          modelViewer.cameraOrbit = `${az.toFixed(1)}deg ${pol.toFixed(1)}deg ${rad.toFixed(1)}%`;
         }
 
-        /* Fade product as features arrive */
         if (p > 0.82) {
           gsap.set(productStage, { opacity: 1 - (p - 0.82) / 0.18 });
         } else if (!mobile) {
@@ -282,52 +368,20 @@
     });
   }
 
-  /* Fit & case: buds settle + lid opens + shine */
-  if (lid && budLeft && budRight) {
-    const fitTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#fit",
-        start: "top 80%",
-        end: "center center",
-        scrub: 0.8,
+  if (modelViewer) {
+    ScrollTrigger.create({
+      trigger: "#fit",
+      start: "top 80%",
+      end: "center center",
+      scrub: 0.8,
+      onUpdate: (self) => {
+        const p = self.progress;
+        const fov = 28 - p * 4;
+        modelViewer.fieldOfView = `${fov.toFixed(1)}deg`;
       },
     });
-
-    fitTl
-      .to(budLeft, { y: 72, x: 10, scale: 0.68, rotate: -8, ease: "none" }, 0)
-      .to(budRight, { y: 72, x: -10, scale: 0.68, rotate: 8, ease: "none" }, 0)
-      .to(
-        lid,
-        {
-          rotateX: -62,
-          y: -22,
-          transformOrigin: "50% 100%",
-          ease: "none",
-        },
-        0
-      );
-
-    const shine = document.querySelector(".shine-bar");
-    if (shine) {
-      gsap.fromTo(
-        shine,
-        { x: -80, opacity: 0 },
-        {
-          x: 280,
-          opacity: 0.7,
-          duration: 1.4,
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: "#fit",
-            start: "top 60%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }
   }
 
-  /* Features stagger + glow */
   gsap.from(featureCards, {
     y: 56,
     opacity: 0,
@@ -342,7 +396,6 @@
     },
   });
 
-  /* Color cards entrance */
   gsap.from(".color-card", {
     y: 48,
     opacity: 0,
@@ -357,7 +410,6 @@
     },
   });
 
-  /* Section copy fades */
   document.querySelectorAll(".section-head, .sound-copy, .cta-panel").forEach((el) => {
     gsap.from(el, {
       y: 36,
@@ -372,7 +424,6 @@
     });
   });
 
-  /* EQ bars amplify in sound section */
   gsap.fromTo(
     ".eq span",
     { scaleY: 0.2, opacity: 0.3 },
@@ -390,7 +441,6 @@
     }
   );
 
-  /* Hide scroll cue */
   gsap.to(".scroll-cue", {
     opacity: 0,
     scrollTrigger: {
@@ -401,7 +451,6 @@
     },
   });
 
-  /* Card hover spring (desktop) */
   if (!isMobile()) {
     featureCards.forEach((card) => {
       card.addEventListener("mouseenter", () => {
@@ -413,7 +462,6 @@
     });
   }
 
-  /* Refresh on resize for pin / mobile switch */
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
