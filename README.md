@@ -35,3 +35,6 @@ Ensure `models/earbuds_case.glb` returns HTTP 200 (model-viewer needs same-origi
 ## GitHub Pages
 
 Settings → Pages → Source: **Deploy from a branch** → Branch **main** / folder **/ (root)**. Commit the binary `models/earbuds_case.glb` so Pages can serve it.
+
+
+**3D model:** hosted via jsDelivr from the MIT-licensed `earbuds_case.glb` (Noah Kennedy / Kennedy_Noah_earbuds). Local copy kept under `models/` for offline preview.
