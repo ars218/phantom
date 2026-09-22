@@ -8,11 +8,15 @@ https://ars218.github.io/phantom/
 
 ## Stack
 
-- `index.html` + `styles.css` + `app.js` (split for GitHub Pages)
+- `index.html` + `styles.css` + `styles-craft.css` + `app.js` (split for GitHub Pages)
 - GSAP 3 + ScrollTrigger (CDN)
-- Custom SVG/CSS product (2D-first specular case + buds) — no 3D / GLB assets
-- Theme via `data-theme` + CSS variables (`midnight` | `aura`) with 1.2s radial gradient morph
+- **Google [`model-viewer`](https://modelviewer.dev/)** hero — real GLB earbuds + charging case at `models/earbuds_case.glb`
+- Theme via `data-theme` + CSS variables (`midnight` | `aura`) with 1.2s radial gradient morph; model tint via materials API (fallback: CSS `hue-rotate` / saturate)
 - Fonts: Syne (display) · Manrope (UI) · Inter (body)
+
+## 3D model credit
+
+Earbuds / case GLB from **[Noah Kennedy — Kennedy_Noah_earbuds](https://github.com/noahk3409/Kennedy_Noah_earbuds)** (MIT). See `models/LICENSE-model.txt`.
 
 ## Scene order
 
@@ -21,10 +25,13 @@ Hero → Colorways → Sound → Fit & case → Features → CTA
 ## Local
 
 ```bash
-python3 -m http.server 8765
-# → http://127.0.0.1:8765/
+cd /workspace/phantom
+python3 -m http.server 46901 --bind 127.0.0.1
+# → http://127.0.0.1:46901/
 ```
+
+Ensure `models/earbuds_case.glb` returns HTTP 200 (model-viewer needs same-origin relative path).
 
 ## GitHub Pages
 
-Settings → Pages → Source: **Deploy from a branch** → Branch **main** / folder **/ (root)**.
+Settings → Pages → Source: **Deploy from a branch** → Branch **main** / folder **/ (root)**. Commit the binary `models/earbuds_case.glb` so Pages can serve it.
